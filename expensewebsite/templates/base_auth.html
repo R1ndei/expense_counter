@@ -15,31 +15,14 @@
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
 
-        <main class="col-md-12"> <div class="card">
+<main>
 
-        </div>
+    {% block content %}
 
-            <div class="col-md-3">
+    {% endblock content %}
 
-            </div>
-
-        <div class="col-md-6">
-            {% block content %}
-
-            {% endblock content %}
-        </div>
-
-            <div class="col-md-3">
-
-            </div>
-
-        </main>
-    </div>
-</div>
-
+</main>
 
 <script src="/docs/5.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"

@@ -11,6 +11,7 @@ python-dotenv = "*"
 django-heroku = "*"
 gunicorn = "*"
 validate-email = "*"
+six = "*"
 
 [dev-packages]
 

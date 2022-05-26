@@ -7,6 +7,7 @@ from django.http import JsonResponse
 
 from .models import Category, Expense
 from userpreferences.models import UserPreference
+import datetime
 
 
 def search_expenses(request):
@@ -98,3 +99,33 @@ def delete_expense(request, id):
     expense.delete()
     messages.success(request, "Success delete")
     return redirect('expenses')
+
+
+def expense_category_summary(request):
+    todays_day = datetime.date.today()
+    six_months_ago = todays_day - datetime.timedelta(days=30 * 6)
+    expenses = Expense.objects.filter(owner=request.user, date__gte=six_months_ago, date__lte=todays_day)
+    finalrep = {}
+
+    def get_category(expense):
+        return expense.category
+
+    category_list = list(set(map(get_category, expenses)))
+
+    def get_expense_category_amount(category):
+        amount = 0
+        filtered_by_category = expenses.filter(category=category)
+        for item in filtered_by_category:
+            amount += item.amount
+        return amount
+
+    for x in expenses:
+        for y in category_list:
+            finalrep[y] = get_expense_category_amount(y)
+
+    return JsonResponse({'expense_category_data': finalrep}, safe=False)
+
+
+def statsView(request):
+    return render(request, 'expenses/stats.html')
+

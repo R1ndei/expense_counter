@@ -16,11 +16,12 @@
     </div>
 
     <div class="col-md-2">
-      <a
-        href="{% url 'income-delete' income.id %}"
+      <form action="{% url 'income-delete' income.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit"
         class="btn btn-danger btn-sm"
-        >Delete</a
-      >
+        >Delete</button>
+      </form>
     </div>
   </div>
 
@@ -30,44 +31,19 @@
         {% include 'partials/_messages.html'%} {% csrf_token %}
         <div class="form-group">
           <label for="">Amount</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            name="amount"
-            value="{{values.amount}}"
-          />
+          {{ form.amount }}
         </div>
         <div class="form-group">
           <label for="">Description</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            name="description"
-            value="{{values.description}}"
-          />
+          {{ form.description }}
         </div>
         <div class="form-group">
           <label for="">Source</label>
-          <select class="form-control" name="source">
-            <option selected name="source" value="{{values.source}}"
-              >{{values.source}}</option
-            >
-            {% for source in sources%}
-            <option name="source" value="{{source.name}}"
-              >{{source.name}}</option
-            >
-
-            {% endfor %}
-          </select>
+          {{ form.source }}
         </div>
         <div class="form-group">
           <label for="">Date of Income</label>
-          <input
-            type="date"
-            value="{{values.date | date:'Y-m-d' }}"
-            class="form-control form-control-sm"
-            name="income_date"
-          />
+          {{ form.date }}
         </div>
 
         <input

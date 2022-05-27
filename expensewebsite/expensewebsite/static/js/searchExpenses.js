@@ -16,16 +16,17 @@ searchField.addEventListener('keyup', (e) => {
         }).then(res => res.json())
             .then(data => {
                 appTable.style.display = 'none';
-                tbody.innerHTML="";
+                tbody.innerHTML = "";
                 tableOutput.style.display = 'block';
                 if (data.length === 0) {
                     tableOutput.innerHTML = 'No results found'
                 } else {
                     data.forEach((item) => {
+                        debugger
                         tbody.innerHTML += `
                         <tr>
                         <td>${item.amount}</td>
-                        <td>${item.category}</td>
+                        <td>${item.category_id}</td>
                         <td>${item.description}</td>
                         <td>${item.date}</td>
                         </tr>

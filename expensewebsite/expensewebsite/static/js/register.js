@@ -27,7 +27,7 @@ emailField.addEventListener('keyup', (e) => {
     EmailFeedBackArea.style.display = "none";
 
     if (emailVal.length > 0) {
-        fetch("/authentication/validate-email/", {
+        fetch("/authentication/validate-username-email/", {
             body: JSON.stringify({email: emailVal}),
             method: 'POST',
         }).then(res => res.json())
@@ -57,7 +57,7 @@ usernameField.addEventListener('keyup', (e) => {
     feedBackArea.style.display = "none";
 
     if (usernameVal.length > 0) {
-        fetch("/authentication/validate-username/", {
+        fetch("/authentication/validate-username-email/", {
             body: JSON.stringify({username: usernameVal}),
             method: 'POST',
         }).then(res => res.json())

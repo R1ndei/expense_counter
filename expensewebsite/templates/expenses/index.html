@@ -50,7 +50,7 @@
     </thead>
 
     <tbody>
-      {% for expense in page_obj%}
+      {% for expense in expenses %}
       <tr>
         <td>{{expense.amount}}</td>
         <td>{{expense.category}}</td>
@@ -59,7 +59,7 @@
 
         <td>
           <a
-            href="{% url 'expense-edit' expense.id  %}"
+            href="{{ expense.get_absolute_url }}"
             class="btn btn-secondary btn-sm"
             >Edit</a
           >

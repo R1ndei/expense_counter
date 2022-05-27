@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.paginator import Paginator
+from django.shortcuts import render
 import json
 from django.http import JsonResponse
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
-from .models import Category, Expense
+from .forms import ExpenseForm, UpdateForm
+from .models import Expense, Category
 from userpreferences.models import UserPreference
 import datetime
 
@@ -16,89 +16,51 @@ def search_expenses(request):
         expenses = Expense.objects.filter(amount__istartswith=search_str, owner=request.user) | \
                    Expense.objects.filter(date__istartswith=search_str, owner=request.user) | \
                    Expense.objects.filter(description__icontains=search_str, owner=request.user) | \
-                   Expense.objects.filter(category__icontains=search_str, owner=request.user)
+                   Expense.objects.filter(category__name__icontains=search_str, owner=request.user)
 
         data = expenses.values()
         return JsonResponse(list(data), safe=False)
 
 
-@login_required(login_url='/authentication/login')
-def index(request):
-    categories = Category.objects.all()
-    expenses = Expense.objects.filter(owner=request.user)
-    paginator = Paginator(expenses, 10)
-    page_number = request.GET.get('page')
-    page_obj = Paginator.get_page(paginator, page_number)
-    currency = UserPreference.objects.get(user=request.user).currency
-    context = {
-        'expenses': expenses,
-        'page_obj': page_obj,
-        'currency': currency,
-    }
-    return render(request, 'expenses/index.html', context)
+class ExpensesView(ListView):
+    template_name = 'expenses/index.html'
+    context_object_name = 'expenses'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Expense.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['currency'] = UserPreference.objects.get(user=self.request.user).currency
+        return context
 
 
-def add_expense(request):
-    categories = Category.objects.all()
-    context = {
-        'categories': categories,
-        'values': request.POST
-    }
-    if request.method == 'GET':
-        return render(request, 'expenses/add_expense.html', context)
+class AddExpensesView(CreateView):
+    form_class = ExpenseForm
+    template_name = 'expenses/add_expense.html'
+    success_url = reverse_lazy('expenses')
 
-    if request.method == 'POST':
-        amount = request.POST['amount']
-        description = request.POST['description']
-        data = request.POST['expense_date']
-        category = request.POST['category']
-
-        if not amount or not description or not category:
-            messages.error(request, "Some field is empty")
-            return render(request, 'expenses/add_expense.html', context)
-
-        Expense.objects.create(owner=request.user, amount=amount, description=description, date=data, category=category)
-        messages.success(request, "Expense save successfully")
-        return redirect('expenses')
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
-@login_required(login_url='/authentication/login')
-def expense_edit(request, id):
-    expense = Expense.objects.get(pk=id)
-    categories = Category.objects.all()
-    context = {
-        'expense': expense,
-        'values': expense,
-        'categories': categories,
-    }
-    if request.method == 'GET':
-        return render(request, 'expenses/edit-expense.html', context)
+class UpdateExpenseView(UpdateView):
+    model = Expense
+    form_class = UpdateForm
+    template_name = 'expenses/edit-expense.html'
+    success_url = reverse_lazy('expenses')
+    context_object_name = 'expense'
 
-    if request.method == 'POST':
-        amount = request.POST['amount']
-        description = request.POST['description']
-        data = request.POST['expense_date']
-        category = request.POST['category']
-
-        if not amount or not description or not category:
-            messages.error(request, "Some field is empty")
-            return render(request, 'expenses/edit-expense.html', context)
-
-        expense.owner = request.user
-        expense.amount = amount
-        expense.description = description
-        expense.date = data
-        expense.category = category
-        expense.save()
-        messages.success(request, "Expense updated successfully")
-        return redirect('expenses')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
-def delete_expense(request, id):
-    expense = Expense.objects.get(pk=id)
-    expense.delete()
-    messages.success(request, "Success delete")
-    return redirect('expenses')
+class DeleteExpenseView(DeleteView):
+    model = Expense
+    success_url = reverse_lazy('expenses')
 
 
 def expense_category_summary(request):
@@ -108,7 +70,7 @@ def expense_category_summary(request):
     finalrep = {}
 
     def get_category(expense):
-        return expense.category
+        return expense.category.pk
 
     category_list = list(set(map(get_category, expenses)))
 
@@ -128,4 +90,3 @@ def expense_category_summary(request):
 
 def statsView(request):
     return render(request, 'expenses/stats.html')
-

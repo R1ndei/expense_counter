@@ -12,6 +12,7 @@ django-heroku = "*"
 gunicorn = "*"
 validate-email = "*"
 six = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
 

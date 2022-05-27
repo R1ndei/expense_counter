@@ -52,7 +52,7 @@
     </thead>
 
     <tbody>
-      {% for income in page_obj%}
+      {% for income in income %}
       <tr>
         <td>{{income.amount}}</td>
         <td>{{income.source}}</td>
@@ -61,7 +61,7 @@
 
         <td>
           <a
-            href="{% url 'income-edit' income.id  %}"
+            href="{{ income.get_absolute_url }}"
             class="btn btn-secondary btn-sm"
             >Edit</a
           >

@@ -16,7 +16,7 @@ searchField.addEventListener('keyup', (e) => {
         }).then(res => res.json())
             .then(data => {
                 appTable.style.display = 'none';
-                tbody.innerHTML="";
+                tbody.innerHTML = "";
                 tableOutput.style.display = 'block';
                 if (data.length === 0) {
                     tableOutput.innerHTML = 'No results found'

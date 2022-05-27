@@ -3,8 +3,8 @@ from .models import Expense, Category
 
 
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ('amount', 'date', 'description', 'owner', 'category')
-    search_fields = ('date', 'description', 'category')
+    list_display = ('amount', 'date', 'description', 'owner')
+    search_fields = ('date', 'description')
 
 
 admin.site.register(Expense, ExpenseAdmin)

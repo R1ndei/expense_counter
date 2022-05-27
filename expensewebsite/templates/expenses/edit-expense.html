@@ -16,11 +16,13 @@
     </div>
 
     <div class="col-md-2">
-      <a
-        href="{% url 'expense-delete' expense.id %}"
+      <form action="{% url 'expense-delete' expense.pk %}" method="post">
+        {% csrf_token %}
+      <button type="submit"
         class="btn btn-danger btn-sm"
-        >Delete</a
+        >Delete</button
       >
+        </form>
     </div>
   </div>
 
@@ -30,44 +32,19 @@
         {% include 'partials/_messages.html'%} {% csrf_token %}
         <div class="form-group">
           <label for="">Amount</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            name="amount"
-            value="{{values.amount}}"
-          />
+          {{ form.amount }}
         </div>
         <div class="form-group">
           <label for="">Description</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            name="description"
-            value="{{values.description}}"
-          />
+          {{ form.description }}
         </div>
         <div class="form-group">
           <label for="">Category</label>
-          <select class="form-control" name="category">
-            <option selected name="category" value="{{values.category}}"
-              >{{values.category}}</option
-            >
-            {% for category in categories%}
-            <option n ame="category" value="{{category.name}}"
-              >{{category.name}}</option
-            >
-
-            {% endfor %}
-          </select>
+          {{ form.category }}
         </div>
         <div class="form-group">
           <label for="">Date of Expense</label>
-          <input
-            type="date"
-            value="{{values.date |date:'Y-m-d' }}"
-            class="form-control form-control-sm"
-            name="expense_date"
-          />
+          {{form.date}}
         </div>
 
         <input

@@ -12,8 +12,11 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-import django_heroku
 from django.contrib import messages
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     'authentication',
     'userpreferences',
     'userincome',
+    'core',
 
 ]
 
@@ -85,10 +89,11 @@ load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_USER_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'HOST': env('DB_HOST'),
+        'PASSWORD': env('DB_PASS'),
+        'PORT': 5432,
     }
 }
 
@@ -133,18 +138,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-django_heroku.settings(locals())
-
 MESSAGE_TAGS = {
     messages.ERROR: 'danger'
 }
 
-EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER')
+DEFAULT_FROM_EMAIL = env('EMAIL_HOST_USER')
 EMAIL_PORT = 465
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_USE_SSL = False
 
 if DEBUG:
@@ -152,3 +155,6 @@ if DEBUG:
     mimetypes.add_type("application/javascript", ".js", True)
 
 INTERNAL_IPS = ("127.0.0.1",)
+
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"

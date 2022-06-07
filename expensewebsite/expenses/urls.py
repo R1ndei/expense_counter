@@ -8,6 +8,6 @@ urlpatterns = [
     path('edit-expense/<int:pk>/', views.UpdateExpenseView.as_view(), name="expense-edit"),
     path('expense-delete/<int:pk>/', views.DeleteExpenseView.as_view(), name="expense-delete"),
     path('search-expenses/', csrf_exempt(views.search_expenses), name="search_expenses"),
-    path('expense_category_summary/', views.expense_category_summary, name="expense_category_summary"),
-    path('stats', views.statsView, name="stats"),
+    path('expense_category_summary/', views.Expense_category_summary.as_view(), name="expense_category_summary"),
+    path('statsexpense', views.statsView, name="statsexpense"),
 ]

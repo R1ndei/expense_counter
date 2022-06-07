@@ -12,6 +12,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from .utils import account_activation_token
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from .tasks import email_sender
 
 
 class CommonValidator(View):
@@ -73,7 +74,7 @@ class RegistrationView(View):
                     'noreply@semycolon.com',
                     [email],
                 )
-                email.send(fail_silently=False)
+                email_sender.delay(email)
                 messages.success(request, 'Account successfully created')
                 return render(request, 'authentication/register.html')
 
@@ -96,10 +97,8 @@ class VerificationView(View):
             messages.success(request, "Account activated successfully")
             return redirect('login')
         except Exception as ex:
-            pass
-
-        id = force_str(urlsafe_base64_decode(uidb64))
-        return redirect('login')
+            id = force_str(urlsafe_base64_decode(uidb64))
+            return redirect('login')
 
 
 class LoginView(View):

@@ -8,6 +8,7 @@ from .forms import ExpenseForm, UpdateForm
 from .models import Expense, Category
 from userpreferences.models import UserPreference
 import datetime
+from django.views import View
 
 
 def search_expenses(request):
@@ -32,8 +33,12 @@ class ExpensesView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['currency'] = UserPreference.objects.get(user=self.request.user).currency
-        return context
+        try:
+            context['currency'] = UserPreference.objects.get(user=self.request.user).currency
+            return context
+        except Exception:
+            context['currency'] = 'USD'
+            return context
 
 
 class AddExpensesView(CreateView):
@@ -63,29 +68,28 @@ class DeleteExpenseView(DeleteView):
     success_url = reverse_lazy('expenses')
 
 
-def expense_category_summary(request):
-    todays_day = datetime.date.today()
-    six_months_ago = todays_day - datetime.timedelta(days=30 * 6)
-    expenses = Expense.objects.filter(owner=request.user, date__gte=six_months_ago, date__lte=todays_day)
-    finalrep = {}
-
-    def get_category(expense):
-        return expense.category.pk
-
-    category_list = list(set(map(get_category, expenses)))
-
-    def get_expense_category_amount(category):
+class Expense_category_summary(View):
+    def get_amount_for_expense(self, expense_list, category):
+        filtered_by_category = expense_list.filter(category__name=category)
         amount = 0
-        filtered_by_category = expenses.filter(category=category)
-        for item in filtered_by_category:
-            amount += item.amount
+
+        for i in filtered_by_category:
+            amount += i.amount
+
         return amount
 
-    for x in expenses:
-        for y in category_list:
-            finalrep[y] = get_expense_category_amount(y)
+    def get(self, request):
+        todays_day = datetime.date.today()
+        six_months_ago = todays_day - datetime.timedelta(days=30 * 6)
+        expenses = Expense.objects.filter(owner=request.user, date__gte=six_months_ago, date__lte=todays_day)
+        finalrep = {}
+        category_list = list(set(map(lambda expense: expense.category.name, expenses)))
 
-    return JsonResponse({'expense_category_data': finalrep}, safe=False)
+        for _ in expenses:
+            for j in category_list:
+                finalrep[j] = self.get_amount_for_expense(expenses, j)
+
+        return JsonResponse({'expense_category_data': finalrep}, safe=False)
 
 
 def statsView(request):

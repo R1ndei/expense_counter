@@ -6,6 +6,9 @@ from userincome.models import UserIncome
 from userpreferences.models import UserPreference
 import json
 from django.http import JsonResponse
+import datetime
+from django.views import View
+from django.shortcuts import render
 
 
 def search_income(request):
@@ -59,3 +62,31 @@ class UpdateIncomeView(UpdateView):
 class DeleteIncomeView(DeleteView):
     model = UserIncome
     success_url = reverse_lazy('income')
+
+
+class Income_source_summary(View):
+    def get_amount_for_income(self, income_list, source):
+        filtered_by_source = income_list.filter(source__name=source)
+        amount = 0
+
+        for i in filtered_by_source:
+            amount += i.amount
+
+        return amount
+
+    def get(self, request):
+        todays_day = datetime.date.today()
+        six_months_ago = todays_day - datetime.timedelta(days=30 * 6)
+        incomes = UserIncome.objects.filter(owner=request.user, date__gte=six_months_ago, date__lte=todays_day)
+        finalrep = {}
+        source_list = list(set(map(lambda income: income.source.name, incomes)))
+
+        for _ in incomes:
+            for j in source_list:
+                finalrep[j] = self.get_amount_for_income(incomes, j)
+
+        return JsonResponse({'income_category_data': finalrep}, safe=False)
+
+
+def statsView(request):
+    return render(request, 'income/stats.html')
